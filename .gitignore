@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-pages/
+.env.local
+.env.*.local
+.env
+.env.*
+!.env.example
+test-results/
+playwright-report/
+*.log
+.pnpm-store/
+*.tsbuildinfo
+docs/screenshots/google-app-information.png

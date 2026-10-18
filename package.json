@@ -1,0 +1,40 @@
+{
+  "name": "daytrace",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:db": "node scripts/test-db.mjs",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@fontsource/sarabun": "5.3.0",
+    "@js-temporal/polyfill": "0.5.1",
+    "@supabase/supabase-js": "2.118.0",
+    "dexie": "4.4.6",
+    "lucide-react": "1.58.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "workbox-window": "7.4.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "fake-indexeddb": "6.2.6",
+    "typescript": "7.0.2",
+    "vite": "8.3.4",
+    "vite-plugin-pwa": "2.0.0",
+    "vitest": "5.0.5"
+  },
+  "packageManager": "pnpm@11.25.0"
+}
