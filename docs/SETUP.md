@@ -12,7 +12,7 @@
 - `.env.local` ในเครื่องมี URL + publishable key แล้ว และถูก ignore ไม่อัปโหลดขึ้น source
 - เปิด Google provider แล้ว ผู้ใช้เข้าสู่ระบบและอนุญาตบัญชีเจ้าของแล้ว ตรวจพบกิจกรรมแรกที่ผู้ใช้บันทึกใน Supabase ตรงกับหน้าแอพ
 - ผู้ใช้สร้าง Google Cloud project **DayTrace** (`daytrace-512002`) และ Web client ชื่อ `DayTrace Web` แล้ว พร้อม origins localhost / 127.0.0.1 port 5173 และ Supabase Callback URL ผู้ใช้กรอกรหัสลับใน dashboard โดยตรง
-- ผู้ใช้อนุญาตให้สร้าง Public repository **Wittaya-Tasu/DayTrace** และเผยแพร่ GitHub Pages แล้ว อยู่ระหว่างดำเนินการ ตรวจสถานะล่าสุดใน PROJECT_STATUS.md
+- เผยแพร่ที่ **https://wittaya-tasu.github.io/DayTrace/** แล้ว หลังผู้ใช้อนุญาต Public repository **Wittaya-Tasu/DayTrace** ตรวจ Google Login บน URL จริงและโหลดกิจกรรมแรกกลับมาได้แล้ว ยังรอทดสอบ iPhone จริง
 
 การเข้าสู่ supabase.com ด้วย GitHub ใช้จัดการ project ส่วนการเข้าสู่ **แอพ DayTrace** ใช้ Google ผ่าน Supabase Auth เป็นอีกขั้นตอนหนึ่ง
 
@@ -57,15 +57,15 @@ on conflict do nothing;
 
 `node scripts/check-cloud.mjs` ตรวจสถานะ Google provider และ anonymous RPC ผ่าน API จริงได้ โดยไม่ใช้ secret ชุด `tests/database.sql` ตรวจ role security ใน PostgreSQL และ rollback ข้อมูลทดสอบทั้งหมด แต่ไม่ได้แทนการทดสอบ Google OAuth สองบัญชีจริง
 
-## 4. GitHub Pages (ยังไม่ได้เผยแพร่)
+## 4. GitHub Pages
 
 1. สร้าง repository **DayTrace** แยกจากแอพอื่น ถ้าใช้ Pages บน GitHub Free ให้ตรวจข้อกำหนดการใช้ public repository และราคา ณ วันเปิดบริการ หากจะ public ต้องตรวจ source ไม่มี secret หรือข้อมูลส่วนตัว
 2. ตั้ง Pages → Source: GitHub Actions
 3. เพิ่ม Actions variables `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (เป็นค่า public ของ frontend)
-4. workflow `.github/workflows/pages.yml` ใช้ชื่อ repository จริงคำนวณ base; repo ชื่อ `DayTrace` จะได้ `/DayTrace/` และ URL ปกติ `https://Wittaya-Tasu.github.io/DayTrace/` **URL นี้ยังไม่ได้เปิดใช้งาน/ยืนยัน**
+4. workflow `.github/workflows/pages.yml` ใช้ชื่อ repository จริงคำนวณ base; repo ชื่อ `DayTrace` ใช้ `/DayTrace/` URL ที่เผยแพร่และยืนยันแล้วคือ `https://wittaya-tasu.github.io/DayTrace/`
 5. เพิ่ม URL ที่ Pages แสดงจริงใน Supabase Site URL / Redirect URLs และ Google Authorized JavaScript origins (origin ไม่มี path)
 6. เปิด source บน GitHub แล้วกด workflow **Build and deploy DayTrace** ด้วยตัวเองเมื่อพร้อมเผยแพร่ Workflow ไม่ deploy อัตโนมัติเมื่อ push
-7. ตรวจ production login, offline shell, manifest scope/start_url และ checklist iPhone ก่อนถือว่า release 1.0 พร้อม
+7. ตรวจ production login, offline shell, manifest scope/start_url และ checklist iPhone ก่อนถือว่า release 1.0 พร้อม สถานะล่าสุด: production login และไฟล์ PWA ผ่านแล้ว การติดตั้งและออฟไลน์บน iPhone จริงยังรอผล
 
 อ้างอิง [Vite GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages) และ [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 

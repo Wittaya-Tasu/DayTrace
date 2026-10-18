@@ -4,6 +4,15 @@
 
 Device target: iPhone 16 Plus; also iPhone 16, iPad and desktop.
 
+Live URL: **https://wittaya-tasu.github.io/DayTrace/**. Desktop production login and retrieval of the owner's existing activity passed on 2026-10-18; physical device results below are still pending.
+
+Initial owner-guided acceptance:
+1. Open the live URL in Safari, sign in with the same Google account, and confirm the existing activity and synced status.
+2. In Safari, use Share (possibly inside the Page Menu), then Add to Home Screen. Enable Open as Web App if offered, and tap Add. Open the new DayTrace icon; sign in again if that context requests it.
+3. Confirm the existing activity remains visible in the Home Screen app. Then test offline reopening and a user-created activity, followed by returning online and checking the same activity in Supabase without duplicates.
+
+Apple's current instructions: https://support.apple.com/guide/iphone/bookmark-a-website-iph42ab2f3a7/ios . Do not mark the checks below from desktop automation.
+
 - [ ] Open the deployed real URL in Safari; Google login completes and app returns to the exact Pages base.
 - [ ] Add to Home Screen; correct icon / name / standalone display / safe areas.
 - [ ] Start at a backdated time, capture now, spend 20 seconds selecting; end remains the tap timestamp.

@@ -4,6 +4,8 @@ PWA ภาษาไทยสำหรับเจ้าของคนเดี�
 
 **สถานะ: 0.1.0 development** — ส่วน local ใช้งานและทดสอบได้ ยังไม่ใช่ release 1.0 ที่ผ่าน Google OAuth / หลายอุปกรณ์ / iPhone จริงครบแล้ว ดู [PROJECT_STATUS.md](PROJECT_STATUS.md)
 
+เว็บที่เผยแพร่: **https://wittaya-tasu.github.io/DayTrace/** — Google Login และการดึงกิจกรรมจริงผ่านแล้ว ยังอยู่ระหว่างตรวจรับบน iPhone ข้อมูลคลาวด์จำกัดเฉพาะบัญชีเจ้าของที่อนุญาตใน Supabase
+
 ## เริ่มในเครื่อง
 
 ต้องมี Node.js 22.12+ (ทดสอบด้วย 24.19.0) และ pnpm 11.25.0
