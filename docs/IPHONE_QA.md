@@ -1,10 +1,12 @@
 # Physical iPhone acceptance checklist
 
-**Not yet run on a physical iPhone.** WebKit automation is useful but does not establish iOS Home Screen / keyboard / storage behavior.
+**Core workflow accepted by the owner on a physical iPhone on 2026-10-18.** Results below distinguish owner-reported checks from server verification. Extended device checks remain open; WebKit automation does not establish untested iOS behavior.
 
 Device target: iPhone 16 Plus; also iPhone 16, iPad and desktop.
 
-Live URL: **https://wittaya-tasu.github.io/DayTrace/**. Desktop production login and retrieval of the owner's existing activity passed on 2026-10-18; physical device results below are still pending.
+Actual acceptance device: owner's iPhone; exact model and iOS version not supplied. The target list above is not a claim that those models were tested.
+
+Live URL: **https://wittaya-tasu.github.io/DayTrace/**. Desktop production login and retrieval of the owner's existing activity passed on 2026-10-18. Owner then confirmed the Safari login, Home Screen launch and offline/resync sequence on their iPhone. The server contained one copy of the latest offline test interval after sync; no activity was changed by the agent.
 
 Initial owner-guided acceptance:
 1. Open the live URL in Safari, sign in with the same Google account, and confirm the existing activity and synced status.
@@ -13,12 +15,14 @@ Initial owner-guided acceptance:
 
 Apple's current instructions: https://support.apple.com/guide/iphone/bookmark-a-website-iph42ab2f3a7/ios . Do not mark the checks below from desktop automation.
 
-- [ ] Open the deployed real URL in Safari; Google login completes and app returns to the exact Pages base.
-- [ ] Add to Home Screen; correct icon / name / standalone display / safe areas.
+- [x] Open the deployed real URL in Safari; Google login and original activity/synced status confirmed by owner, 2026-10-18.
+- [x] Add to Home Screen and open from its icon; confirmed by owner, 2026-10-18.
+- [ ] Explicit visual inspection of icon/name, standalone display and safe areas on the physical device.
 - [ ] Start at a backdated time, capture now, spend 20 seconds selecting; end remains the tap timestamp.
 - [ ] Close while picker is open; reopen, pending + cursor intact; make next capture.
-- [ ] Open online once, airplane mode, close/reopen from Home Screen, capture/assign/edit; local records survive.
-- [ ] Return online / foreground; queue drains once, counts match cloud.
+- [x] Open online once, airplane mode with Wi-Fi off, close/reopen from Home Screen, capture/assign, close/reopen again; owner confirmed local persistence, 2026-10-18.
+- [x] Return online / foreground and reach synced status; owner confirmed, and scoped Supabase read verified the offline test interval exists exactly once, 2026-10-18.
+- [ ] Edit an existing interval while offline and verify resynchronization.
 - [ ] Long open interval / overnight / several background days: recomputed from timestamps.
 - [ ] Keyboard open in note field: scroll to save CTA; no lost focus or hidden button.
 - [ ] Large Text / browser text zoom, portrait and landscape: all controls accessible, no horizontal overflow at 375–440 CSS px.

@@ -12,7 +12,7 @@
 - `.env.local` ในเครื่องมี URL + publishable key แล้ว และถูก ignore ไม่อัปโหลดขึ้น source
 - เปิด Google provider แล้ว ผู้ใช้เข้าสู่ระบบและอนุญาตบัญชีเจ้าของแล้ว ตรวจพบกิจกรรมแรกที่ผู้ใช้บันทึกใน Supabase ตรงกับหน้าแอพ
 - ผู้ใช้สร้าง Google Cloud project **DayTrace** (`daytrace-512002`) และ Web client ชื่อ `DayTrace Web` แล้ว พร้อม origins localhost / 127.0.0.1 port 5173 และ Supabase Callback URL ผู้ใช้กรอกรหัสลับใน dashboard โดยตรง
-- เผยแพร่ที่ **https://wittaya-tasu.github.io/DayTrace/** แล้ว หลังผู้ใช้อนุญาต Public repository **Wittaya-Tasu/DayTrace** ตรวจ Google Login บน URL จริงและโหลดกิจกรรมแรกกลับมาได้แล้ว ยังรอทดสอบ iPhone จริง
+- เผยแพร่ที่ **https://wittaya-tasu.github.io/DayTrace/** แล้ว หลังผู้ใช้อนุญาต Public repository **Wittaya-Tasu/DayTrace** ตรวจ Google Login บน URL จริงและโหลดกิจกรรมแรกกลับมาได้แล้ว ผู้ใช้ยืนยันการเปิดจากไอคอนบน iPhone และบันทึกออฟไลน์/เปิดกลับ/ซิงก์ ตรวจใน Supabase พบรายการทดสอบหนึ่งรายการ ไม่ซ้ำ
 
 การเข้าสู่ supabase.com ด้วย GitHub ใช้จัดการ project ส่วนการเข้าสู่ **แอพ DayTrace** ใช้ Google ผ่าน Supabase Auth เป็นอีกขั้นตอนหนึ่ง
 
@@ -65,7 +65,7 @@ on conflict do nothing;
 4. workflow `.github/workflows/pages.yml` ใช้ชื่อ repository จริงคำนวณ base; repo ชื่อ `DayTrace` ใช้ `/DayTrace/` URL ที่เผยแพร่และยืนยันแล้วคือ `https://wittaya-tasu.github.io/DayTrace/`
 5. เพิ่ม URL ที่ Pages แสดงจริงใน Supabase Site URL / Redirect URLs และ Google Authorized JavaScript origins (origin ไม่มี path)
 6. เปิด source บน GitHub แล้วกด workflow **Build and deploy DayTrace** ด้วยตัวเองเมื่อพร้อมเผยแพร่ Workflow ไม่ deploy อัตโนมัติเมื่อ push
-7. ตรวจ production login, offline shell, manifest scope/start_url และ checklist iPhone ก่อนถือว่า release 1.0 พร้อม สถานะล่าสุด: production login และไฟล์ PWA ผ่านแล้ว การติดตั้งและออฟไลน์บน iPhone จริงยังรอผล
+7. ตรวจ production login, offline shell, manifest scope/start_url และ checklist iPhone ก่อนถือว่า release 1.0 พร้อม สถานะล่าสุด: production login, ไฟล์ PWA และการใช้งานหลักบน iPhone จริงผ่านแล้ว รุ่น 0.1.0 พร้อมเริ่มใช้งานส่วนตัว ส่วน QA ขั้นสูงยังคงรายการที่ไม่ผ่านการทดสอบไว้ใน docs/IPHONE_QA.md
 
 อ้างอิง [Vite GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages) และ [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)
 
