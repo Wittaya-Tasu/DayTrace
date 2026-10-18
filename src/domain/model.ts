@@ -47,14 +47,16 @@ export function validateSnapshot(input: unknown): Snapshot {
   return s;
 }
 
-const seeds = [
-  ['นอน','#9B8AF0','moon'], ['ทำงาน','#58B98A','briefcase'], ['กินข้าว','#F69B43','utensils'],
-  ['ดูแลตัวเอง','#D8B85E','sun'], ['เดินทาง','#619DEA','car'], ['พักผ่อน','#EE99AF','coffee'],
-  ['เรียนรู้','#58ADAC','book'], ['ออกกำลัง','#EC7180','heart'], ['งานบ้าน / ธุระ','#A18A74','home'],
-  ['ครอบครัว / สังคม','#A778C1','users'], ['อื่น ๆ','#83929B','circle']
+// Stable seed IDs are independent of display order: inserting a category must not
+// change the meaning of IDs already referenced by stored activities or backups.
+const seeds: readonly (readonly [number,string,string,string])[] = [
+  [1,'นอน','#9B8AF0','moon'], [2,'ทำงาน','#58B98A','briefcase'], [3,'กินข้าว','#F69B43','utensils'],
+  [4,'ธุระส่วนตัว','#D8B85E','sun'], [5,'เดินทาง','#619DEA','car'], [6,'พักผ่อน','#EE99AF','coffee'],
+  [12,'บันเทิง','#7F8DE8','circle'], [7,'เรียนรู้/พัฒนา','#58ADAC','book'], [8,'ออกกำลัง','#EC7180','heart'],
+  [9,'งานบ้าน','#A18A74','home'], [10,'ครอบครัว/สังคม','#A778C1','users'], [11,'อื่น ๆ','#83929B','circle']
 ];
 export const initialSnapshot = (): Snapshot => ({
-  categories: seeds.map(([name,color,icon],i) => ({id:`00000000-0000-4000-8000-${String(i+1).padStart(12,'0')}`,name,color,icon,sort_order:i,is_pinned:i<3,archived_at:null,version:1})),
+  categories: seeds.map(([seedId,name,color,icon],i) => ({id:`00000000-0000-4000-8000-${String(seedId).padStart(12,'0')}`,name,color,icon,sort_order:i,is_pinned:i<3,archived_at:null,version:1})),
   intervals: [], cursor_at: null, timezone: 'Asia/Bangkok'
 });
 export function patchBetween(before: Snapshot, after: Snapshot): Patch {

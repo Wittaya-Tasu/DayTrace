@@ -10,6 +10,7 @@ Version: 0.1.0 (initial personal-use release; core iPhone workflow accepted by o
 - Reference JPEG was not supplied; use the handoff's written green / Thai visual specification.
 
 ## Implemented
+- Owner-requested category revision: 12 defaults in the supplied order; rename self-care to personal errands, learning to learning/development, housework/errands to housework, and normalize family/social spacing; insert entertainment after rest. Existing category IDs, activity rows and open cursor preserved. Applied to the owner's cloud data through one normal category-update RPC with revision/receipt/audit handling and locked before/after activity checks; source seed IDs are now explicit and independent of display order. TypeScript and all 20 unit/storage tests passed after the source change.
 - Thai responsive capture UI; fixed tap end; pending assignment persists across reload.
 - Atomic IndexedDB view/cursor/outbox; split, merge, boundary preview, fill gaps, cursor correction, undo and trash.
 - Category management (name/color/icon/order/pin/archive); real daily/weekly/monthly timeline and summary with UTC / IANA / DST handling.
