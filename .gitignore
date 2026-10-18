@@ -10,5 +10,6 @@ test-results/
 playwright-report/
 *.log
 .pnpm-store/
+.tools/
 *.tsbuildinfo
 docs/screenshots/google-app-information.png

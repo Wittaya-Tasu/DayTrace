@@ -19,12 +19,12 @@ Version: 0.1.0 (development; not a production release).
 - JSON consistent export / validation / import preview / merge or replace; Thai CSV; weekly export reminder.
 - PWA manifest, original PNG icons, self-hosted Sarabun+license, offline shell/fonts, prompted update and safe-area styles.
 - Setup / architecture / security / operations / iPhone QA docs, manual Pages deployment workflow and separate CI checks.
-- Dependencies pinned, lockfile present. Local Git initialized; no remote created, commit or push performed.
+- Dependencies pinned, lockfile present. Local Git initialized with commit `636769d`; remote `https://github.com/Wittaya-Tasu/DayTrace.git` added. Public repository created after explicit user approval. Source push is pending GitHub CLI device authorization; connector write returned 403 and Git had no cached login. No source was uploaded by those failed attempts.
 
 ## Pending external setup
 - Google Cloud project DayTrace (`daytrace-512002`): OAuth branding and `DayTrace Web` OAuth Client created by user. User transferred credentials directly to Supabase; Google provider enabled and verified through public Auth settings API. No secret values read or saved in source/chat. Site URL `http://127.0.0.1:5173/` and exact redirects for localhost / 127.0.0.1 port 5173 saved by user and confirmed in dashboard. User added their chosen Google account as a test user and successfully signed in.
 - Sole owner allowlist entry added after explicit user approval. Guarded transaction verified the supplied current account has a Google identity and refused to proceed if another owner existed. App permission refresh opened the cloud capture screen showing “ซิงก์แล้ว”, zero activities and no initialized cursor. Existing development records remain isolated and were not changed or imported.
-- GitHub repository / Pages URL and deployment authorization.
+- Public repository `Wittaya-Tasu/DayTrace` and publication explicitly authorized by user; repository exists. Intended Pages URL is `https://wittaya-tasu.github.io/DayTrace/`, not live or verified yet. Supabase Site URL and an exact HTTPS redirect were saved and confirmed in dashboard; both local redirects retained. GitHub CLI authorization page is open for the user to review broader standard CLI permissions and approve themselves. Portable official CLI is in ignored `.tools/`; no credentials are in source.
 - Real two-account Google login / expired session / online outbox delivery / two-device concurrency and conflict tests.
 - Physical iPhone Home Screen, keyboard, storage limits, text zoom and upgrade QA.
 
@@ -53,4 +53,4 @@ Version: 0.1.0 (development; not a production release).
 - No public deployment, paid plan, custom domain, AI API or automatic Drive backup.
 
 ## Release gate
-Do not describe online integration or the whole application as complete until tested against the configured project. No deployment has been requested or performed.
+Do not describe the whole application or iPhone support as complete until the remaining production and device checks pass. Publication is now requested and authorized; it has not yet completed.
