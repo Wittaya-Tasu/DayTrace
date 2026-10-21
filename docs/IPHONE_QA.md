@@ -6,6 +6,15 @@ Device target: iPhone 16 Plus; also iPhone 16, iPad and desktop.
 
 Actual acceptance device: owner's iPhone; exact model and iOS version not supplied. The target list above is not a claim that those models were tested.
 
+## Version 0.2 follow-up (pending physical iPhone confirmation)
+
+- [ ] Export JSON in the old version, finish editors/sync, accept the update, and confirm Settings shows 0.2.0 with existing records intact.
+- [ ] Assign a primary activity and a different concurrent activity to a user-chosen interval; confirm elapsed time is counted once and the concurrent report is separate.
+- [ ] Capture/assign the pair offline, close/reopen, return online and confirm one synchronized interval with both roles.
+- [ ] Split/merge a concurrent interval, verify the previewed pair, and restore a schema-2 backup in a separate test context.
+
+Local verification passed: six Chromium/mobile-WebKit UI checks, production Chromium offline/reopen with a pair, schema-1 IndexedDB upgrade preserving the exact old queue payload, and a live owner desktop-browser 0.1→0.2 update. These do not mark the physical checks above complete.
+
 Live URL: **https://wittaya-tasu.github.io/DayTrace/**. Desktop production login and retrieval of the owner's existing activity passed on 2026-10-18. Owner then confirmed the Safari login, Home Screen launch and offline/resync sequence on their iPhone. The server contained one copy of the latest offline test interval after sync; no activity was changed by the agent.
 
 Initial owner-guided acceptance:
@@ -35,7 +44,7 @@ Apple's current instructions: https://support.apple.com/guide/iphone/bookmark-a-
 - [ ] Change reporting timezone; Bangkok and 23/25-hour DST dates sum correctly.
 - [ ] Log out with pending queue; export option and original account namespace retained.
 - [ ] A new build prompts for update; no reload during capture or unsaved editor; export before updating.
-- [ ] Upgrade from an older DB version without losing data or outbox (first release has only schema v1).
+- [ ] Upgrade from schema 1 to schema 2 on the physical iPhone without losing data or outbox (automated and existing desktop-profile upgrade verified).
 - [ ] Two devices at same base revision: later sender conflicts; original local data and server data both exportable.
 
 Record date, device/iOS version and actual result beside each item. Never mark these done from desktop screenshots alone.

@@ -9,7 +9,7 @@ Version: 0.2.0 (concurrent activities; initial physical iPhone workflow accepted
 - IndexedDB upgrades additively to version 2 in the same database namespace. Old outbox payloads and operation IDs are retained unchanged and sent through legacy RPC for lost-ack receipt compatibility; new commands use v2 RPC. Once concurrent data exists, legacy new writes stop rather than discard it; upgraded clients can review/reconcile that queue as a conflict.
 - Additive migration `20261021013145_secondary_activities.sql` applied to real Supabase. Locked before/after fingerprints verified existing activities and cursor/revisions were unchanged; the new field is null on all pre-existing records. Legacy snapshot shape remains stable. RLS remains enabled, both snapshots deny anonymous HTTP calls with 401, and advisor findings are documented in docs/SECURITY.md.
 - Verified locally: TypeScript/build, 29 unit/storage/transport tests (including real v1 IndexedDB upgrade and unchanged payloads), legacy plus v2 PGlite SQL suites, 6 Chromium/mobile-WebKit UI tests including backup/restore, and production Chromium PWA offline/reopen with both activities. Initial test harness timing/output-directory collisions were corrected; these are passing final runs.
-- Frontend publication and live read verification are in progress. No live owner activity was assigned a secondary or otherwise modified for testing. Physical iPhone acceptance of 0.2 remains to be confirmed by the owner after updating.
+- Frontend publication completed: deployment run `39528936074` and full CI run `39528934702` passed for commit `e82ceea`. In the existing owner browser, the prompted 0.1→0.2 update reopened the old records with synced status and zero queued operations. The live editor displayed the optional secondary-activity selector; it was closed without saving. No live owner activity was assigned a secondary or otherwise modified for testing. Physical iPhone acceptance of 0.2 remains to be confirmed by the owner after updating.
 
 ## Architecture and environment
 - Workspace was empty; no existing Git repository, source, or applicable AGENTS.md found.
@@ -61,7 +61,7 @@ Version: 0.2.0 (concurrent activities; initial physical iPhone workflow accepted
 
 ## Known limitations / release gates
 - The three requested rollout steps are complete: cloud record verification, HTTPS publication, and basic physical iPhone Home Screen/offline/resync acceptance. This establishes readiness for initial personal use; it does not establish every advanced editing, multi-device stress, storage-pressure or upgrade scenario.
-- First local schema is v1; real upgrade from an older deployed schema has not been tested. No destructive reset / purge is implemented.
+- Local schema is v2. V1→v2 store/queue migration passed automated tests and the existing owner desktop-browser update; physical iPhone upgrade is still awaiting owner confirmation. No destructive reset / purge is implemented.
 - Undo conservatively supports the latest safe operation; local history is capped at 50 snapshots / 90 days. Dataset cap: 500 categories, 50,000 intervals including tombstones, JSON 20 MB.
 - Expired trash remains a tombstone; receipts are retained. Future archival requires a safe versioned migration.
 - Security advisor reports intentional no-policy allowlist and guarded authenticated SECURITY DEFINER RPC exposure; rationale and remediation links are in docs/SECURITY.md.
