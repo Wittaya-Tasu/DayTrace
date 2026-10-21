@@ -34,15 +34,19 @@ export function daySegments(s:Snapshot,date:string,now=Date.now()):Segment[]{
   return output;
 }
 export function totals(s:Snapshot,dates:string[],now=Date.now()){
-  const byCategory=new Map<string,number>();let pending=0,gap=0,open=0,future=0,denominator=0;
+  const byCategory=new Map<string,number>(),bySecondaryCategory=new Map<string,number>();let pending=0,gap=0,open=0,future=0,denominator=0;
   for(const date of dates){denominator+=dayBounds(date,s.timezone).length;
     for(const row of daySegments(s,date,now)){
       const ms=row.end-row.start;
-      if(row.status==='assigned') byCategory.set(row.categoryId!, (byCategory.get(row.categoryId!)??0)+ms);
+      if(row.status==='assigned') {
+        byCategory.set(row.categoryId!, (byCategory.get(row.categoryId!)??0)+ms);
+        const secondary=row.interval?.secondary_category_id;
+        if(secondary) bySecondaryCategory.set(secondary,(bySecondaryCategory.get(secondary)??0)+ms);
+      }
       else if(row.status==='pending') pending+=ms;else if(row.status==='gap') gap+=ms;else if(row.status==='open') open+=ms;else future+=ms;
     }
   }
-  return {byCategory,pending,gap,open,future,denominator};
+  return {byCategory,bySecondaryCategory,pending,gap,open,future,denominator};
 }
 export function duration(ms:number,seconds=false){
   const total=Math.max(0,Math.floor(ms/1000)),h=Math.floor(total/3600),m=Math.floor(total%3600/60),s=total%60;

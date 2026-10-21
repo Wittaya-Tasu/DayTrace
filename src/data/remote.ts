@@ -19,6 +19,7 @@ export interface Transport {pull():Promise<RemoteSnapshot>;apply(op:Operation):P
 export class RemoteError extends Error {constructor(message:string,readonly kind:'conflict'|'auth'|'validation'|'network'){super(message);}}
 function remoteError(error:{message:string;code?:string;status?:number}){
   if(error.message.includes('REVISION_CONFLICT')) return new RemoteError('ข้อมูลบนอีกเครื่องเปลี่ยนแล้ว','conflict');
+  if(error.message.includes('CLIENT_UPDATE_REQUIRED')) return new RemoteError('มีข้อมูลกิจกรรมร่วมบนเซิร์ฟเวอร์แล้ว กรุณาตรวจและรวมคิวจากเวอร์ชันเดิม','conflict');
   if(error.code==='42501'||error.code==='PGRST301'||error.status===401) return new RemoteError('กรุณาเข้าสู่ระบบด้วยบัญชีเจ้าของ','auth');
   if(error.code?.startsWith('23')||error.code==='P0001'||error.code==='22023'||error.code==='22P02') return new RemoteError(error.message,'validation');
   return new RemoteError(error.message,'network');
@@ -28,12 +29,12 @@ export function transport(userId:string):Transport{
   const checkUser=async()=>{const {data:{session}}=await client.auth.getSession();if(session?.user.id!==userId) throw new RemoteError('บัญชีไม่ตรงกับข้อมูลในเครื่อง','auth');};
   return {
     async pull(){
-      await checkUser();const {data,error}=await client.rpc('daytrace_snapshot');if(error) throw remoteError(error);
+      await checkUser();const {data,error}=await client.rpc('daytrace_snapshot_v2');if(error) throw remoteError(error);
       if(!data) throw new RemoteError('ไม่ได้รับอนุญาต','auth');
       return {snapshot:validateSnapshot(data.snapshot),revision:data.revision};
     },
     async apply(op){
-      await checkUser();const {data,error}=await client.rpc('apply_timeline_operation',{p_operation_id:op.operation_id,p_expected_revision:op.expected_revision,p_type:op.type,p_payload:op.payload,p_device_id:op.device_id});
+      await checkUser();const {data,error}=await client.rpc(op.protocol_version===2?'apply_timeline_operation_v2':'apply_timeline_operation',{p_operation_id:op.operation_id,p_expected_revision:op.expected_revision,p_type:op.type,p_payload:op.payload,p_device_id:op.device_id});
       if(error) throw remoteError(error);return data.revision;
     }
   };
@@ -42,7 +43,7 @@ export async function seedIfEmpty(t:Transport,deviceId:string){
   const remote=await t.pull();
   if(remote.revision===0&&remote.snapshot.categories.length===0){
     const s=initialSnapshot();
-    await t.apply({operation_id:crypto.randomUUID(),expected_revision:0,type:'category_update',payload:s,created_at:new Date().toISOString(),device_id:deviceId});
+    await t.apply({operation_id:crypto.randomUUID(),expected_revision:0,type:'category_update',payload:s,created_at:new Date().toISOString(),device_id:deviceId,protocol_version:2});
     return t.pull();
   }
   return remote;

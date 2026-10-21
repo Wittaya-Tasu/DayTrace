@@ -11,6 +11,7 @@ import { CategoryIcon } from '../components/Icon';
 export function Editor({snapshot,id,run,onClose}:{snapshot:Snapshot;id:string;run:(c:Command,label:string)=>Promise<void>;onClose:()=>void}){
   const interval=snapshot.intervals.find(i=>i.id===id&&!i.deleted_at)!;
   const [categoryId,setCategoryId]=useState<string|null>(interval?.category_id??null),[note,setNote]=useState(interval?.note??'');
+  const [secondaryCategoryId,setSecondaryCategoryId]=useState<string|null>(interval?.secondary_category_id??null);
   const [openedSnapshot]=useState(()=>JSON.stringify(snapshot));
   const [tool,setTool]=useState<'main'|'split'|'boundary'|'merge'>('main');
   const [start,setStart]=useState(inputTime(interval?.start_at??Date.now(),snapshot.timezone)),[end,setEnd]=useState(inputTime(interval?.end_at??Date.now(),snapshot.timezone));
@@ -24,13 +25,15 @@ export function Editor({snapshot,id,run,onClose}:{snapshot:Snapshot;id:string;ru
     <div className="frozen-time"><Clock3 size={20}/><div><strong>{clock(interval.start_at,snapshot.timezone)} – {clock(interval.end_at,snapshot.timezone)}</strong><span>{duration(Date.parse(interval.end_at)-Date.parse(interval.start_at),true)} · เวลาถูกเก็บไว้แล้ว</span></div></div>
     {error&&<p className="error" role="alert">{error}</p>}
     {tool==='main'?<>
-      <p className="field-title">เลือกกิจกรรมที่ผ่านมา</p>
-      <div className="category-grid">{categories.map(c=><button key={c.id} className={`category-choice ${categoryId===c.id?'selected':''}`} onClick={()=>setCategoryId(c.id)} aria-pressed={categoryId===c.id}>
+      <p className="field-title">กิจกรรมหลัก</p>
+      <div className="category-grid">{categories.map(c=><button key={c.id} className={`category-choice ${categoryId===c.id?'selected':''}`} onClick={()=>{setCategoryId(c.id);if(secondaryCategoryId===c.id)setSecondaryCategoryId(null);}} aria-pressed={categoryId===c.id}>
         <span className="category-icon" style={{backgroundColor:`${c.color}25`,color:c.color}}><CategoryIcon name={c.icon}/></span><span>{c.name}</span>{categoryId===c.id?<Check size={17}/>:c.is_pinned?<Bookmark size={13}/>:null}
       </button>)}</div>
+      <label className="field">กิจกรรมร่วม <span className="muted">(ไม่บังคับ)</span><select aria-label="กิจกรรมร่วม" value={secondaryCategoryId??''} disabled={!categoryId} onChange={e=>setSecondaryCategoryId(e.target.value||null)}><option value="">ไม่มีกิจกรรมร่วม</option>{categories.filter(c=>c.id!==categoryId).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+      <p className="muted secondary-activity-help">ทำพร้อมกันตลอดช่วงนี้ · นับเวลารวมครั้งเดียว และสรุปเวลาร่วมแยก</p>
       <label className="field">รายละเอียด <span className="muted">(ไม่บังคับ)</span><textarea value={note} maxLength={1000} onChange={e=>setNote(e.target.value)} rows={3} placeholder="เติมเรื่องเล็ก ๆ ของช่วงเวลานี้…"/></label>
       <small className="muted counter">{note.length}/1,000</small>
-      <button className="primary full" disabled={busy||!categoryId} onClick={()=>void commit({type:'assign',id,categoryId,note},'ระบุกิจกรรม')}><Check size={20}/>บันทึกกิจกรรม</button>
+      <button className="primary full" disabled={busy||!categoryId} onClick={()=>void commit({type:'assign',id,categoryId,secondaryCategoryId,note},'ระบุกิจกรรม')}><Check size={20}/>บันทึกกิจกรรม</button>
       <button className="text-button full" onClick={onClose}>ไว้ระบุทีหลัง</button>
       <div className="editor-tools">
         <button className="secondary" onClick={()=>setTool('split')}><Scissors size={17}/>แบ่งช่วงเวลา</button>
@@ -50,7 +53,7 @@ export function Editor({snapshot,id,run,onClose}:{snapshot:Snapshot;id:string;ru
         {preview&&<div className="notice"><strong>ช่วงที่จะเปลี่ยน</strong>{preview.intervals.filter(i=>JSON.stringify(i)!==JSON.stringify(snapshot.intervals.find(x=>x.id===i.id))).map(i=><p key={i.id}>{snapshot.categories.find(c=>c.id===i.category_id)?.name??'รอระบุ'} · {clock(i.start_at,snapshot.timezone)}–{clock(i.end_at,snapshot.timezone)} · {duration(Date.parse(i.end_at)-Date.parse(i.start_at),true)}</p>)}</div>}
         <button className="primary full" disabled={busy||!preview} onClick={()=>void commit({type:'adjust_boundary',id,start:parseInput(start,snapshot.timezone),end:parseInput(end,snapshot.timezone),adjustNeighbors:adjust},'แก้ขอบเวลา')}>ยืนยันแก้เวลาตามที่แสดง</button>
       </>}
-      {tool==='merge'&&<><p>กิจกรรมและรายละเอียดที่เลือกในหน้าก่อน จะใช้กับช่วงที่รวมทั้งหมด</p>{neighbors.map(i=><label key={i.id} className="radio-row"><input type="radio" name="merge" checked={mergeId===i.id} onChange={()=>setMergeId(i.id)}/><span>{clock(i.start_at,snapshot.timezone)}–{clock(i.end_at,snapshot.timezone)} · {snapshot.categories.find(c=>c.id===i.category_id)?.name??'รอระบุ'}<small>{i.note||'ไม่มีรายละเอียด'}</small></span></label>)}<div className="notice">หลังรวม: {categories.find(c=>c.id===categoryId)?.name??'รอระบุ'}<br/>รายละเอียด: {note||'ไม่มีรายละเอียด'}</div><button className="primary full" disabled={busy||!mergeId} onClick={()=>void commit({type:'merge',ids:[id,mergeId],categoryId,note},'รวมช่วงเวลา')}>ยืนยันรวมช่วงและใช้รายละเอียดนี้</button></>}
+      {tool==='merge'&&<><p>กิจกรรมหลัก กิจกรรมร่วม และรายละเอียดที่เลือกในหน้าก่อน จะใช้กับช่วงที่รวมทั้งหมด</p>{neighbors.map(i=><label key={i.id} className="radio-row"><input type="radio" name="merge" checked={mergeId===i.id} onChange={()=>setMergeId(i.id)}/><span>{clock(i.start_at,snapshot.timezone)}–{clock(i.end_at,snapshot.timezone)} · {snapshot.categories.find(c=>c.id===i.category_id)?.name??'รอระบุ'}<small>{i.note||'ไม่มีรายละเอียด'}</small></span></label>)}<div className="notice">หลังรวม: {categories.find(c=>c.id===categoryId)?.name??'รอระบุ'}<br/>กิจกรรมร่วม: {categories.find(c=>c.id===secondaryCategoryId)?.name??'ไม่มี'}<br/>รายละเอียด: {note||'ไม่มีรายละเอียด'}</div><button className="primary full" disabled={busy||!mergeId} onClick={()=>void commit({type:'merge',ids:[id,mergeId],categoryId,secondaryCategoryId,note},'รวมช่วงเวลา')}>ยืนยันรวมช่วงและใช้รายละเอียดนี้</button></>}
     </>}
   </Modal>;
 }

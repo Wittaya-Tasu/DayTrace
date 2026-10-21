@@ -46,3 +46,26 @@ test('375px mobile page fits and categories editor stays usable',async({page})=>
   await page.getByRole('button',{name:'เพิ่มหมวดใหม่'}).click();await page.getByRole('textbox',{name:'ชื่อหมวด'}).fill('ทำสวน');await page.getByRole('button',{name:'บันทึกหมวดกิจกรรม'}).click();
   await expect(page.getByRole('button',{name:'ทำสวน แตะเพื่อแก้ไข',exact:true})).toBeVisible();
 });
+
+test('primary plus concurrent activity persists, reports separately and restores from v2 backup',async({page})=>{
+  await page.goto('/');await page.getByRole('button',{name:'ทดลองบันทึกในเครื่องนี้'}).click();
+  await page.getByRole('button',{name:'เริ่มติดตาม',exact:true}).click();
+  const start=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Bangkok',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(Date.now()-3600000)).replace(' ','T');
+  await page.locator('dialog input[type=datetime-local]').fill(start);await page.getByRole('button',{name:'ยืนยันเริ่มติดตาม'}).click();
+  await page.getByRole('button',{name:'บันทึกเวลา',exact:true}).click();
+  await page.getByRole('button',{name:'เดินทาง',exact:true}).click();
+  await page.getByRole('combobox',{name:'กิจกรรมร่วม',exact:true}).selectOption({label:'เรียนรู้/พัฒนา'});
+  await page.getByRole('textbox',{name:/รายละเอียด/}).fill('ฟัง podcast ระหว่างเดินทาง');
+  await page.getByRole('button',{name:'บันทึกกิจกรรม',exact:true}).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect(page.locator('.activity-row').filter({hasText:'ร่วม: เรียนรู้/พัฒนา'})).toBeVisible();
+  await page.reload();await expect(page.locator('.activity-row').filter({hasText:'ร่วม: เรียนรู้/พัฒนา'})).toBeVisible();
+  await page.getByRole('button',{name:'สรุป',exact:true}).click();
+  const primary=page.locator('section.card').filter({has:page.getByRole('heading',{name:'เวลาของกิจกรรมหลัก',exact:true})});
+  await expect(primary.getByRole('cell',{name:'เดินทาง',exact:true})).toBeVisible();await expect(primary.getByRole('cell',{name:'เรียนรู้/พัฒนา',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('table',{name:'เวลาของกิจกรรมร่วม'}).getByRole('cell',{name:'เรียนรู้/พัฒนา',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'สัปดาห์',exact:true}).click();await expect(page.getByRole('table',{name:'เวลาของกิจกรรมร่วม'}).getByRole('columnheader',{name:'เฉลี่ย/วัน'})).toBeVisible();
+  await page.getByRole('button',{name:'ตั้งค่า',exact:true}).click();const downloaded=page.waitForEvent('download');await page.getByRole('button',{name:'ส่งออก JSON สำหรับกู้คืน'}).click();const backup=await downloaded;
+  const json=JSON.parse(await readFile((await backup.path())!,'utf8'));expect(json.schema_version).toBe(2);expect(json.snapshot.intervals[0].secondary_category_id).not.toBeNull();
+  const fresh=await page.context().browser()!.newContext();try{const restored=await fresh.newPage();await restored.goto('/');await restored.getByRole('button',{name:'ทดลองบันทึกในเครื่องนี้'}).click();await restored.getByRole('button',{name:'ตั้งค่า',exact:true}).click();await restored.locator('input[type=file]').setInputFiles((await backup.path())!);await restored.getByRole('button',{name:'ยืนยันนำเข้า',exact:true}).click();await restored.getByRole('button',{name:'บันทึก',exact:true}).click();await expect(restored.locator('.activity-row').filter({hasText:'ร่วม: เรียนรู้/พัฒนา'})).toBeVisible();}finally{await fresh.close();}
+});

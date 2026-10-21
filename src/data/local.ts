@@ -7,7 +7,13 @@ export class DayTraceDB extends Dexie {
   constructor(namespace:string){
     super(`daytrace:v1:${namespace}`);
     this.version(1).stores({states:'id'});
-    // Add migrations in later versions. Never delete the database to resolve an upgrade.
+    this.version(2).stores({states:'id'}).upgrade(tx=>tx.table('states').toCollection().modify((state:LocalState)=>{
+      state.canonical=validateSnapshot(state.canonical);state.view=validateSnapshot(state.view);
+      for(const h of state.history) h.before=validateSnapshot(h.before);
+      if(state.conflict) state.conflict.remote=validateSnapshot(state.conflict.remote);
+      // Receipt hashes include the original payload: never normalize an old outbox payload.
+      for(const op of state.outbox) op.protocol_version??=1;
+    }));
   }
 }
 export const blankState=():LocalState=>({id:'state',canonical:initialSnapshot(),view:initialSnapshot(),revision:0,outbox:[],history:[],lastSyncedAt:null,lastExportedAt:null,deviceId:crypto.randomUUID(),conflict:null});
@@ -29,7 +35,7 @@ export class Repository {
       const before=structuredClone(current.view),next=reduce(before,command);
       const revision=current.revision+current.outbox.length;
       // New IDs and timestamps are allocated before queueing; retries reuse the operation verbatim.
-      const operation:Operation={operation_id:crypto.randomUUID(),expected_revision:revision,type:command.type,payload:patchBetween(before,next),created_at:iso(Date.now()),device_id:current.deviceId};
+      const operation:Operation={operation_id:crypto.randomUUID(),expected_revision:revision,type:command.type,payload:patchBetween(before,next),created_at:iso(Date.now()),device_id:current.deviceId,protocol_version:2};
       if(this.cloud) current.outbox.push(operation);else {current.revision++;current.canonical=next;}
       current.view=next;
       current.history.push({before,after_revision:revision+1,label,created_at:iso(Date.now())});
@@ -43,7 +49,7 @@ export class Repository {
       const item=current.history.at(-1),revision=current.revision+current.outbox.length;
       if(!item||item.after_revision!==revision||Date.now()-Date.parse(item.created_at)>90*86400000||current.conflict) throw Error('มีการเปลี่ยนแปลงใหม่แล้ว กรุณาแก้จากรายการย้อนหลัง');
       const next=reduce(current.view,{type:'undo',snapshot:item.before});
-      if(this.cloud) current.outbox.push({operation_id:crypto.randomUUID(),expected_revision:revision,type:'undo',payload:patchBetween(current.view,next),created_at:iso(Date.now()),device_id:current.deviceId});
+      if(this.cloud) current.outbox.push({operation_id:crypto.randomUUID(),expected_revision:revision,type:'undo',payload:patchBetween(current.view,next),created_at:iso(Date.now()),device_id:current.deviceId,protocol_version:2});
       else {current.revision++;current.canonical=next;}
       current.view=next;current.history=[];await this.db.states.put(current);return current;
     });
@@ -79,7 +85,7 @@ export class Repository {
       const current=await this.db.states.get('state');if(!current?.conflict) throw Error('ไม่พบข้อมูลขัดแย้ง');
       const {remote,revision}=current.conflict;
       const next=reduce(remote,{type:'import_batch',snapshot});
-      const op:Operation={operation_id:crypto.randomUUID(),expected_revision:revision,type:'import_batch',payload:patchBetween(remote,next),created_at:iso(Date.now()),device_id:current.deviceId};
+      const op:Operation={operation_id:crypto.randomUUID(),expected_revision:revision,type:'import_batch',payload:patchBetween(remote,next),created_at:iso(Date.now()),device_id:current.deviceId,protocol_version:2};
       current.canonical=remote;current.revision=revision;current.view=next;current.outbox=[op];current.history=[];current.conflict=null;
       await this.db.states.put(current);return current;
     });

@@ -11,5 +11,6 @@ playwright-report/
 *.log
 .pnpm-store/
 .tools/
+supabase/.temp/
 *.tsbuildinfo
 docs/screenshots/google-app-information.png

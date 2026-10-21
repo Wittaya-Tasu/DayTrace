@@ -6,15 +6,21 @@
 
 Temporal handles IANA day boundaries, DST, Monday weeks and calendar months. Reports clip intervals to each real day. Assigned / pending / gap / open / future partition the entire day. Percent denominator is the real day, including the remainder of today; period averages exclude future dates.
 
+`category_id` is the primary activity; optional `secondary_category_id` describes a different activity performed throughout the same interval. The primary alone participates in the daily partition. Secondary totals are independently clipped and displayed separately, never added to elapsed time. Split retains both roles; merge explicitly previews and applies the selected pair to the entire merged range. A partial concurrent activity requires splitting the interval first.
+
 ## Local transaction
 
 Dexie DB name: `daytrace:v1:<environment hostname>:<auth user UUID>`; local development uses `daytrace:v1:development`. No automatic adoption of development data into an authenticated account.
 
 The `states` record contains a canonical snapshot, optimistic view, server revision, ordered outbox, undo history, conflict snapshot and device/export metadata. A readwrite transaction computes a domain operation and commits view + cursor + outbox together. UI reports success only after transaction completion. Dexie liveQuery subscribes read-only after initialization.
 
+IndexedDB schema 2 keeps the original database name. Upgrade normalizes canonical/view/history/conflict snapshots with a null secondary for legacy records. It does not rewrite queued payloads: old operations get protocol 1 metadata, while new operations have protocol 2. Original payload bytes and IDs are essential for replaying already-committed legacy receipts.
+
 Undo is revision guarded, produces a new mutation, and retains tombstones for introduced entities. It is conservatively limited to the latest operation from this device. No rewind over remote revisions. History is capped at 50 entries / 90 days.
 
 ## Shared mutation transport
+
+Current reads use `daytrace_snapshot_v2` and new writes use `apply_timeline_operation_v2`. Legacy outbox entries use `apply_timeline_operation` unchanged. V2 receipt hashes additionally bind protocol 2. Legacy snapshot shape remains unchanged for cached apps. Legacy receipt replay still succeeds after secondary data exists; new legacy writes then return CLIENT_UPDATE_REQUIRED. Upgraded clients retain/export/reconcile that old queue through the conflict flow rather than silently rebasing or discarding it.
 
 Every command has a client reducer and produces an upsert patch:
 
@@ -43,6 +49,8 @@ Sync runs on startup, foreground, online and after mutation (debounced). Network
 No iOS Background Sync dependency. No realtime or second-by-second polling. Remote account verification precedes first bootstrap; a previously verified owner may access cached local records during a network outage, while database RLS always enforces actual server permission.
 
 ## Backup
+
+Exports use JSON schema 2; imports accept schema 1 and 2. Missing legacy secondary fields normalize to null. CSV retains one row/duration per interval and appends `secondary_category`.
 
 Consistent IndexedDB snapshot; explicit field allowlist excludes auth tokens. JSON contains actual records, cursor, timezone, sync label and pending operations for inspection/recovery. Import validates and rebuilds canonical records with a fresh operation; never replays exported operations. Existing IDs require explicit conflict resolution. Replace mode tombstones removed intervals and archives omitted categories in one transaction.
 

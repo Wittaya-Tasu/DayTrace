@@ -16,7 +16,7 @@ Settings shows local/server interval counts, cursor and revisions; export both d
 
 ## Import / replace
 
-Validate file ≤20 MB, schema v1, timestamps, IDs, categories, overlap, cursor and current account. Preview before committing. Default merge is conservative; same ID with changed content requires choosing incoming or replacing. For these choices, save the current JSON first and verify the file has been kept. Dataset changes occur as one IndexedDB transaction and one server operation.
+Validate file ≤20 MB, schema v1/v2, timestamps, IDs, primary/secondary categories, overlap, cursor and current account. Exports use v2; v1 imports have no secondary activity. Preview before committing. Default merge is conservative; same ID with changed content requires choosing incoming or replacing. For these choices, save the current JSON first and verify the file has been kept. Dataset changes occur as one IndexedDB transaction and one server operation.
 
 If restoring from local development to the real account, login to the allowed owner and import the JSON there. Dev and cloud DBs are intentionally separate.
 
@@ -26,4 +26,4 @@ Trash restoration: 30 days. Server audit: 90 days. Local undo: latest safe opera
 
 ## Frontend rollback
 
-Keep the last known good deployment artifact / commit and JSON exports. Redeploy that source via Pages; retain compatible IndexedDB schemas. Never fix a service worker cache problem by instructing the user to erase browser data without a verified export. Current v0.1.0 supports prompted SW updates; real upgrade + DB migration remains on the iPhone acceptance list.
+Keep the last known good deployment artifact / commit and JSON exports. V0.2 upgrades IndexedDB to schema 2; do not redeploy a v0.1 frontend that only opens schema 1 after that upgrade. A corrective build must retain schema 2 and protocol/backup compatibility. Never erase browser data to fix an update. Before updating, finish open editors, sync/export pending data, then accept the prompted update. Physical iPhone upgrade acceptance remains on the checklist; local v1 upgrade and lost-ack preservation tests pass.

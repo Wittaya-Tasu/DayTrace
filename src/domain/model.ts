@@ -9,6 +9,7 @@ export const CategorySchema = z.object({
 }).strict();
 export const IntervalSchema = z.object({
   id: uuid, start_at: stamp, end_at: stamp, category_id: uuid.nullable(),
+  secondary_category_id: uuid.nullable().default(null),
   note: z.string().max(1000), version: z.number().int().positive(), deleted_at: stamp.nullable()
 }).strict();
 export const SnapshotSchema = z.object({
@@ -23,7 +24,7 @@ export type Snapshot = z.infer<typeof SnapshotSchema>;
 export const operationTypes = ['initialize','capture','assign','split','merge','adjust_boundary','soft_delete','restore','undo','category_update','import_batch','fill_gap','profile_update'] as const;
 export type OperationType = typeof operationTypes[number];
 export interface Patch { categories: Category[]; intervals: Interval[]; cursor_at: string | null; timezone: string }
-export interface Operation { operation_id: string; expected_revision: number; type: OperationType; payload: Patch; created_at: string; device_id: string }
+export interface Operation { operation_id: string; expected_revision: number; type: OperationType; payload: Patch; created_at: string; device_id: string; protocol_version?: 1|2 }
 export interface History { before: Snapshot; after_revision: number; label: string; created_at: string }
 export interface LocalState {
   id: 'state'; canonical: Snapshot; view: Snapshot; revision: number; outbox: Operation[];
@@ -40,6 +41,8 @@ export function validateSnapshot(input: unknown): Snapshot {
   for (const i of s.intervals) {
     if (Date.parse(i.end_at) <= Date.parse(i.start_at)) throw Error('เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่ม');
     if (i.category_id && !cats.has(i.category_id)) throw Error('ไม่พบหมวดกิจกรรมที่อ้างถึง');
+    if (i.secondary_category_id && !cats.has(i.secondary_category_id)) throw Error('ไม่พบหมวดกิจกรรมร่วมที่อ้างถึง');
+    if (i.secondary_category_id && (!i.category_id || i.secondary_category_id===i.category_id)) throw Error('กิจกรรมร่วมต้องต่างจากกิจกรรมหลัก และต้องเลือกกิจกรรมหลักก่อน');
     if (!i.deleted_at && (!s.cursor_at || Date.parse(i.end_at) > Date.parse(s.cursor_at))) throw Error('ช่วงเวลาล้ำเข้าไปในช่วงกำลังเดิน');
   }
   const intervals = active(s);

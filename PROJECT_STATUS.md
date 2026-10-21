@@ -1,6 +1,15 @@
-# DayTrace status — 2026-10-18
+# DayTrace status — 2026-10-21
 
-Version: 0.1.0 (initial personal-use release; core iPhone workflow accepted by owner, extended QA remains).
+Version: 0.2.0 (concurrent activities; initial physical iPhone workflow accepted on 0.1, extended QA remains).
+
+## 0.2 concurrent activities — 2026-10-21
+- Owner selected primary activity plus an optional concurrent activity, with concurrent totals shown separately. Primary time partitions the day exactly once; secondary totals use the same clipped interval duration, including midnight and DST boundaries.
+- Editor, gap fill, split/merge, boundary edits, undo/trash, recent list, timeline labels and daily/weekly/monthly reports support both roles. A secondary needs a primary, must differ from it, and must reference a category belonging to the same owner.
+- JSON exports use schema 2 and imports accept schemas 1/2; legacy records normalize to no secondary. CSV appends a secondary-category column and retains one row per interval.
+- IndexedDB upgrades additively to version 2 in the same database namespace. Old outbox payloads and operation IDs are retained unchanged and sent through legacy RPC for lost-ack receipt compatibility; new commands use v2 RPC. Once concurrent data exists, legacy new writes stop rather than discard it; upgraded clients can review/reconcile that queue as a conflict.
+- Additive migration `20261021013145_secondary_activities.sql` applied to real Supabase. Locked before/after fingerprints verified existing activities and cursor/revisions were unchanged; the new field is null on all pre-existing records. Legacy snapshot shape remains stable. RLS remains enabled, both snapshots deny anonymous HTTP calls with 401, and advisor findings are documented in docs/SECURITY.md.
+- Verified locally: TypeScript/build, 29 unit/storage/transport tests (including real v1 IndexedDB upgrade and unchanged payloads), legacy plus v2 PGlite SQL suites, 6 Chromium/mobile-WebKit UI tests including backup/restore, and production Chromium PWA offline/reopen with both activities. Initial test harness timing/output-directory collisions were corrected; these are passing final runs.
+- Frontend publication and live read verification are in progress. No live owner activity was assigned a secondary or otherwise modified for testing. Physical iPhone acceptance of 0.2 remains to be confirmed by the owner after updating.
 
 ## Architecture and environment
 - Workspace was empty; no existing Git repository, source, or applicable AGENTS.md found.

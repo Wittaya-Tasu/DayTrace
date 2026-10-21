@@ -10,7 +10,8 @@ export function Timeline({snapshot,date,now,onSelect,compact=false}:{snapshot:Sn
       <div className="timeline" role="group" aria-label={`แถบเวลาวันที่ ${thaiDate(date)} ${duration(bounds.length)}`}>
         {segments.map((row,n)=>{
           const category=snapshot.categories.find(c=>c.id===row.categoryId);
-          const label=`${category?.name??statusNames[row.status]} ${clock(row.start,snapshot.timezone)}–${clock(row.end,snapshot.timezone)} ${duration(row.end-row.start,true)}`;
+          const secondary=snapshot.categories.find(c=>c.id===row.interval?.secondary_category_id);
+          const label=`${category?.name??statusNames[row.status]}${secondary?` · ร่วม: ${secondary.name}`:''} ${clock(row.start,snapshot.timezone)}–${clock(row.end,snapshot.timezone)} ${duration(row.end-row.start,true)}`;
           return <button key={n} className={`segment ${row.status}`} style={{width:`${(row.end-row.start)/bounds.length*100}%`,backgroundColor:category?.color}} aria-label={label} title={label} onClick={()=>onSelect(row)}/>;
         })}
       </div>

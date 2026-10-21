@@ -3,13 +3,13 @@ import { active, iso, validateSnapshot, type Snapshot, type Category } from './m
 export type Command =
  | { type:'initialize'; at:number }
  | { type:'capture'; at:number; id:string }
- | { type:'assign'; id:string; categoryId:string|null; note:string }
+ | { type:'assign'; id:string; categoryId:string|null; secondaryCategoryId?:string|null; note:string }
  | { type:'split'; id:string; at:number; newId:string }
- | { type:'merge'; ids:string[]; categoryId:string|null; note:string }
+ | { type:'merge'; ids:string[]; categoryId:string|null; secondaryCategoryId?:string|null; note:string }
  | { type:'adjust_boundary'; id:string; start:number; end:number; adjustNeighbors:boolean }
  | { type:'adjust_boundary'; cursor:number }
  | { type:'soft_delete'|'restore'; id:string; at:number }
- | { type:'fill_gap'; start:number; end:number; id:string; categoryId:string|null; note:string }
+ | { type:'fill_gap'; start:number; end:number; id:string; categoryId:string|null; secondaryCategoryId?:string|null; note:string }
  | { type:'category_update'; category:Category }
  | { type:'profile_update'; timezone:string }
  | { type:'import_batch'|'undo'; snapshot:Snapshot };
@@ -26,10 +26,10 @@ export function reduce(s:Snapshot, command:Command, now=Date.now()):Snapshot {
       if(!next.cursor_at) throw Error('เริ่มติดตามก่อนบันทึก');
       validTime(command.at);
       if(command.at<=Date.parse(next.cursor_at)) throw Error('เวลาปัจจุบันไม่อยู่หลังการกดล่าสุด กรุณาตรวจนาฬิกาหรือแก้เวลาเริ่ม');
-      next.intervals.push({id:command.id,start_at:next.cursor_at,end_at:iso(command.at),category_id:null,note:'',version:1,deleted_at:null});
+      next.intervals.push({id:command.id,start_at:next.cursor_at,end_at:iso(command.at),category_id:null,secondary_category_id:null,note:'',version:1,deleted_at:null});
       next.cursor_at=iso(command.at); break;
     }
-    case 'assign': {const i=get(command.id); i.category_id=command.categoryId;i.note=command.note;i.version++;break;}
+    case 'assign': {const i=get(command.id); i.category_id=command.categoryId;i.secondary_category_id=command.secondaryCategoryId??null;i.note=command.note;i.version++;break;}
     case 'split': {
       const i=get(command.id); if(command.at<=Date.parse(i.start_at)||command.at>=Date.parse(i.end_at)) throw Error('จุดแบ่งต้องอยู่ภายในช่วงเวลา');
       const end=i.end_at;i.end_at=iso(command.at);i.version++;
@@ -39,7 +39,7 @@ export function reduce(s:Snapshot, command:Command, now=Date.now()):Snapshot {
       const rows=command.ids.map(get).sort((a,b)=>Date.parse(a.start_at)-Date.parse(b.start_at));
       if(rows.length<2||new Set(command.ids).size!==rows.length) throw Error('เลือกอย่างน้อยสองช่วงที่ติดกัน');
       for(let n=1;n<rows.length;n++) if(Date.parse(rows[n-1].end_at)!==Date.parse(rows[n].start_at)) throw Error('รวมได้เฉพาะช่วงที่ติดกัน');
-      rows[0].end_at=rows.at(-1)!.end_at;rows[0].category_id=command.categoryId;rows[0].note=command.note;rows[0].version++;
+      rows[0].end_at=rows.at(-1)!.end_at;rows[0].category_id=command.categoryId;rows[0].secondary_category_id=command.secondaryCategoryId??null;rows[0].note=command.note;rows[0].version++;
       rows.slice(1).forEach(i=>{i.deleted_at=iso(now);i.version++;});break;
     }
     case 'adjust_boundary': {
@@ -63,7 +63,7 @@ export function reduce(s:Snapshot, command:Command, now=Date.now()):Snapshot {
     }
     case 'fill_gap':
       validTime(command.start);validTime(command.end);
-      next.intervals.push({id:command.id,start_at:iso(command.start),end_at:iso(command.end),category_id:command.categoryId,note:command.note,version:1,deleted_at:null});break;
+      next.intervals.push({id:command.id,start_at:iso(command.start),end_at:iso(command.end),category_id:command.categoryId,secondary_category_id:command.secondaryCategoryId??null,note:command.note,version:1,deleted_at:null});break;
     case 'category_update': {
       const old=next.categories.find(c=>c.id===command.category.id);
       const row={...command.category,version:(old?.version??0)+1};
@@ -83,6 +83,7 @@ export function reduce(s:Snapshot, command:Command, now=Date.now()):Snapshot {
   const result=validateSnapshot(next);
   // Archived categories retain their historical references; new assignments require an active category.
   if('categoryId' in command && command.categoryId && !result.categories.some(c=>c.id===command.categoryId&&!c.archived_at)) throw Error('หมวดนี้ถูกเก็บถาวรแล้ว');
+  if('secondaryCategoryId' in command && command.secondaryCategoryId && !result.categories.some(c=>c.id===command.secondaryCategoryId&&!c.archived_at)) throw Error('หมวดกิจกรรมร่วมนี้ถูกเก็บถาวรแล้ว');
   return result;
 }
 

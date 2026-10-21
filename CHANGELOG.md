@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0 — 2026-10-21
+
+- Add one optional concurrent activity per interval. Primary totals count elapsed time once; concurrent totals appear separately for day/week/month.
+- Preserve both roles through offline capture, edits, split/merge, undo/trash, JSON v2 backup/restore and CSV export; accept v1 backups.
+- Additive IndexedDB v2 upgrade preserves legacy outbox payloads and IDs; versioned server RPCs retain legacy snapshot/receipt compatibility and reject legacy writes that could lose concurrent activity data.
+- Additive PostgreSQL migration verifies existing activity/cursor data is unchanged and retains owner RLS/permissions. No existing owner activity is automatically relabeled with a secondary.
+
 ## 0.1.0 — category update (2026-10-18)
 
 - Defaults now contain 12 activities in the owner's requested order, adding บันเทิง after พักผ่อน.
